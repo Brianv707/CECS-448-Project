@@ -200,7 +200,7 @@ class _SetDetailScreenState extends State<SetDetailScreen> {
                       crossAxisCount: 3, // Increased from 2 to 3 cards per row
                       crossAxisSpacing: 80,
                       mainAxisSpacing: 80,
-                      childAspectRatio: 0.65, // Made slightly taller aspect ratio
+                      childAspectRatio: 0.72, // Made slightly taller aspect ratio
                     ),
                     itemCount: filteredCardList.length,
                     itemBuilder: (context, index) {
