@@ -8,6 +8,8 @@ import 'package:pokemon_card_tracker/screens/login_screen.dart';
 import 'package:pokemon_card_tracker/screens/signup_screen.dart';
 import 'package:pokemon_card_tracker/screens/home_screen.dart';
 import 'package:pokemon_card_tracker/screens/set_detail_screen.dart';
+import 'package:pokemon_card_tracker/providers/collection_provider.dart';
+
 
 void main() {
   runApp(const PokemonCardTracker());
@@ -25,6 +27,7 @@ class PokemonCardTracker extends StatelessWidget {
         return MultiProvider(
           providers: [
             ChangeNotifierProvider(create: (_) => AuthService()),
+            ChangeNotifierProvider(create: (_) => CollectionProvider()),
           ],
           child: MaterialApp.router(
             debugShowCheckedModeBanner: false,
