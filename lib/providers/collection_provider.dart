@@ -1,6 +1,7 @@
 // collection_provider.dart
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pokemon_card_tracker/models/pokemon_card.dart';
 import 'dart:convert';
 
 class CollectionProvider extends ChangeNotifier {
@@ -52,6 +53,38 @@ class CollectionProvider extends ChangeNotifier {
   int getCollectionCount(String setId) {
     _ensureLoaded();
     return _collectionsBySet[setId]?.length ?? 0;
+  }
+
+  // Get total collection count across all sets
+  int getTotalCollectionCount() {
+    _ensureLoaded();
+    int total = 0;
+    _collectionsBySet.forEach((_, cards) {
+      total += cards.length;
+    });
+    return total;
+  }
+
+  // Get all collected cards across all sets
+  List<PokemonCard> getAllCollectedCards() {
+    _ensureLoaded();
+    List<PokemonCard> allCollectedCards = [];
+    
+    // Go through each set
+    _collectionsBySet.forEach((setId, cardIds) {
+      // Get mock cards for this set
+      final setCards = PokemonCard.getMockCardsForSet(setId);
+      
+      // Filter only collected cards
+      final collectedCards = setCards.where((card) => 
+        cardIds.contains(card.id)
+      ).toList();
+      
+      // Add to the master list
+      allCollectedCards.addAll(collectedCards);
+    });
+    
+    return allCollectedCards;
   }
 
   // Get collection completion percentage for a set

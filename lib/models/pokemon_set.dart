@@ -5,6 +5,7 @@ class PokemonSet {
   final String imageUrl;
   final int totalCards;
   final DateTime releaseDate;
+  final bool isSpecialSet; // Flag to identify special sets like "My Collection"
   
   PokemonSet({
     required this.id,
@@ -13,11 +14,22 @@ class PokemonSet {
     required this.imageUrl,
     required this.totalCards,
     required this.releaseDate,
+    this.isSpecialSet = false,
   });
   
   // Mock data for demonstration
   static List<PokemonSet> getMockSets() {
     return [
+      // Special set for all collected cards
+      PokemonSet(
+        id: 'my_collection',
+        name: 'My Collection',
+        series: 'All Series',
+        imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Pok%C3%A9_Ball_icon.svg/1200px-Pok%C3%A9_Ball_icon.svg.png',
+        totalCards: 0, // This will be dynamically updated
+        releaseDate: DateTime.now(),
+        isSpecialSet: true,
+      ),
       PokemonSet(
         id: 'base1',
         name: 'Shrouded Fable',
