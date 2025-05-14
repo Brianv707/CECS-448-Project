@@ -16,6 +16,9 @@ class HomeScreen extends StatelessWidget {
     final collectionProvider = context.watch<CollectionProvider>();
     final sets = PokemonSet.getMockSets();
     
+    // Get the total collection count
+    final totalCollectionCount = collectionProvider.getTotalCollectionCount();
+    
     return Scaffold(
       backgroundColor: const Color(0xFF2364AA), // Pokemon blue background
       appBar: AppBar(
@@ -23,19 +26,34 @@ class HomeScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true, // Center the logo
         toolbarHeight: 140, // Increase AppBar height to accommodate larger image
-        title: Image.asset(
-          'logo.png',
-          height: 120,
-          fit: BoxFit.contain,
+        title: Column(  // Wrap logo and text in a Column
+          children: [
+            Image.asset(
+              'logo.png',
+              height: 100,  // Slightly reduced height to make room for text
+              fit: BoxFit.contain,
+            ),
+            const Text(
+              'CARD TRACKER',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ],
         ),
         automaticallyImplyLeading: false, // Remove back button if present
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: () {
-              authService.logout();
-              context.go('/');
-            },
+          Padding(  // Added padding to position the logout button in the top right
+            padding: const EdgeInsets.only(top:0, right: 8.0),
+            child: IconButton(
+              icon: const Icon(Icons.logout, color: Colors.white),
+              onPressed: () {
+                authService.logout();
+                context.go('/');
+              },
+            ),
           ),
         ],
       ),
@@ -85,26 +103,44 @@ class HomeScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final set = sets[index];
                   
-                  // Get actual collection progress from provider
-                  final collectedCount = collectionProvider.getCollectionCount(set.id);
-                  final progress = set.totalCards > 0 ? 
-                      collectedCount / set.totalCards : 0.0;
+                  // Special handling for "My Collection" 
+                  final bool isMyCollection = set.id == 'my_collection';
+                  
+                  // Get collection progress
+                  final collectedCount = isMyCollection 
+                      ? totalCollectionCount
+                      : collectionProvider.getCollectionCount(set.id);
+                  
+                  final progress = set.totalCards > 0 
+                      ? collectedCount / set.totalCards 
+                      : (isMyCollection && totalCollectionCount > 0) ? 1.0 : 0.0;
                   
                   return ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        onTap: () => context.go('/set/${set.id}'),
+                        onTap: () {
+                          if (isMyCollection) {
+                            // Navigate to the My Collection screen
+                            context.go('/my-collection');
+                          } else {
+                            // Navigate to regular set detail
+                            context.go('/set/${set.id}');
+                          }
+                        },
                         splashColor: Colors.blue.withOpacity(0.3),
                         highlightColor: Colors.blue.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                         child: Card(
                           elevation: 2,
                           margin: EdgeInsets.zero, // Remove default Card margin
-                          color: Colors.grey[200],
+                          color: isMyCollection ? Colors.amber[100] : Colors.grey[200], // Highlight My Collection
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
+                            side: isMyCollection 
+                              ? BorderSide(color: Colors.amber, width: 2) 
+                              : BorderSide.none,
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -112,28 +148,69 @@ class HomeScreen extends StatelessWidget {
                               // Set logo
                               Expanded(
                                 child: Padding(
-                                  padding: EdgeInsets.all(20), // Reduced padding even more
-                                  child: Image.network(
-                                    set.imageUrl,
-                                    fit: BoxFit.contain,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Center(
-                                        child: Icon(
-                                          Icons.image_not_supported,
-                                          size: 24, // Smaller icon
-                                          color: Colors.grey[600],
+                                  padding: EdgeInsets.all(20), // Reduced padding
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      Image.network(
+                                        set.imageUrl,
+                                        fit: BoxFit.contain,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return Center(
+                                            child: Icon(
+                                              Icons.image_not_supported,
+                                              size: 24, // Smaller icon
+                                              color: Colors.grey[600],
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      if (isMyCollection)
+                                        Positioned(
+                                          top: 0,
+                                          right: 0,
+                                          child: Container(
+                                            padding: EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                              color: Colors.amber,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Text(
+                                              '$totalCollectionCount',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ),
                                         ),
-                                      );
-                                    },
+                                    ],
                                   ),
+                                ),
+                              ),
+                              
+                              // Set name
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                child: Text(
+                                  set.name,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: isMyCollection ? Colors.amber[800] : Colors.black87,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               
                               // Progress indicator
                               Container(
-                                padding: EdgeInsets.symmetric(vertical: 20, horizontal: 20), // Reduced padding
+                                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20), // Reduced padding
                                 decoration: BoxDecoration(
-                                  color: Colors.grey[300],
+                                  color: isMyCollection ? Colors.amber[200] : Colors.grey[300],
                                   borderRadius: BorderRadius.vertical(
                                     bottom: Radius.circular(8),
                                   ),
@@ -148,18 +225,20 @@ class HomeScreen extends StatelessWidget {
                                         minHeight: 4, // Thinner progress bar
                                         backgroundColor: Colors.grey[400],
                                         valueColor: AlwaysStoppedAnimation<Color>(
-                                          AppColors.primaryBlue, // Use consistent color
+                                          isMyCollection ? Colors.amber[800]! : AppColors.primaryBlue, // Use consistent color
                                         ),
                                       ),
                                     ),
                                     SizedBox(height: 2), // Minimal spacing
                                     // Progress text
                                     Text(
-                                      '$collectedCount/${set.totalCards}',
+                                      isMyCollection 
+                                          ? '$totalCollectionCount total'
+                                          : '$collectedCount/${set.totalCards}',
                                       style: TextStyle(
-                                        fontSize: 14, // Smaller font
+                                        fontSize: 12, // Smaller font
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.black87,
+                                        color: isMyCollection ? Colors.amber[800] : Colors.black87,
                                       ),
                                       textAlign: TextAlign.center,
                                     ),

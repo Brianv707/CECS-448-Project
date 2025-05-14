@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pokemon_card_tracker/screens/my_cards_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:pokemon_card_tracker/services/auth_service.dart';
 import 'package:pokemon_card_tracker/screens/welcome_screen.dart';
@@ -9,7 +10,6 @@ import 'package:pokemon_card_tracker/screens/signup_screen.dart';
 import 'package:pokemon_card_tracker/screens/home_screen.dart';
 import 'package:pokemon_card_tracker/screens/set_detail_screen.dart';
 import 'package:pokemon_card_tracker/providers/collection_provider.dart';
-
 
 void main() {
   runApp(const PokemonCardTracker());
@@ -69,6 +69,11 @@ final _router = GoRouter(
         final setId = state.pathParameters['setId']!;
         return SetDetailScreen(setId: setId);
       },
+    ),
+    // Add new route for My Collection
+    GoRoute(
+      path: '/my-collection',
+      builder: (context, state) => const MyCollectionScreen(),
     ),
   ],
 );

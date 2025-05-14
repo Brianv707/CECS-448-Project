@@ -93,14 +93,16 @@ class _SetDetailScreenState extends State<SetDetailScreen> {
         return 4;
       case 'ultra rare':
         return 5;
-      case 'illustration rare':
+      case 'ace spec rare':
         return 6;
-      case 'special illustration rare':
+      case 'illustration rare':
         return 7;
-      case 'hyper rare':
+      case 'special illustration rare':
         return 8;
-      case 'promo':
+      case 'hyper rare':
         return 9;
+      case 'promo':
+        return 10;
       default:
         return 0;
     }
@@ -315,8 +317,10 @@ class _SetDetailScreenState extends State<SetDetailScreen> {
         return Colors.blue[900]!;  // Darker blue for double rare
       case 'ultra rare':
         return Colors.purple[700]!;
+      case 'ace spec rare':
+        return Colors.pink[400]!;
       case 'illustration rare':
-        return Colors.pink[400]!;  // Pink for illustration rare
+        return Colors.yellow[400]!;  // Pink for illustration rare
       case 'special illustration rare':
         return Colors.pink[700]!;  // Darker pink for special illustration rare
       case 'hyper rare':
@@ -354,36 +358,55 @@ class _SetDetailScreenState extends State<SetDetailScreen> {
         return Scaffold(
           backgroundColor: const Color(0xFF2364AA), // Pokemon blue background
           appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            centerTitle: true, // Center the logo
-            toolbarHeight: 80, // Increase AppBar height to accommodate larger image
-            title: Image.asset(
-              'logo.png',
-              height: 80,
-              fit: BoxFit.contain,
-            ),
-            // Add back button to the left
-            leading: IconButton(
-              icon: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: EdgeInsets.all(4),
-                child: Icon(
-                  Icons.arrow_back,
-                  color: AppColors.primaryBlue,
-                  size: 20,
-                ),
-              ),
-              onPressed: () {
-                // Navigate to home using GoRouter
-                context.go('/home');
-              },
-            ),
-            automaticallyImplyLeading: false, // Don't use default back button
+  backgroundColor: Colors.transparent,
+  elevation: 0,
+  // Remove centerTitle to allow title to align left
+  centerTitle: false,
+  toolbarHeight: 80,
+  leadingWidth: 40, // Reduce leading width to bring title closer
+  // Add back button to the left
+  leading: IconButton(
+    icon: Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: EdgeInsets.all(4),
+      child: Icon(
+        Icons.arrow_back,
+        color: AppColors.primaryBlue,
+        size: 20,
+      ),
+    ),
+    onPressed: () {
+      // Navigate to home using GoRouter
+      context.go('/home');
+    },
+  ),
+  // Custom title with set logo and name
+  title: Row(
+    children: [
+      // Set logo
+      Container(
+        height: 80,
+        width: 160,
+        margin: EdgeInsets.only(right: 12),
+        
+        padding: EdgeInsets.all(4),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: CachedNetworkImage(
+            imageUrl: pokemonSet.imageUrl,
+            fit: BoxFit.contain,
+            
           ),
+        ),
+      ),
+      
+    ],
+  ),
+  automaticallyImplyLeading: false, // Don't use default back button
+),
           body: Column(
             children: [
               // Search bar, filter button, quick collect button, and collection progress in one row
@@ -793,92 +816,9 @@ class _SetDetailScreenState extends State<SetDetailScreen> {
             ],
           ),
           
-          // Floating Action Button for Collection Summary
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              _showCollectionSummary(context);
-            },
-            backgroundColor: AppColors.primaryBlue,
-            child: const Icon(Icons.insights),
-          ),
+          
         );
       }
-    );
-  }
-  
-  void _showCollectionSummary(BuildContext context) {
-    final collectionProvider = Provider.of<CollectionProvider>(context, listen: false);
-    final collectedCardIds = collectionProvider.getCollectedCards(widget.setId);
-    
-    final collectedByRarity = <String, int>{};
-    final collectedByType = <String, int>{};
-    
-    for (final card in cards) {
-      if (collectedCardIds.contains(card.id)) {
-        collectedByRarity[card.rarity] = (collectedByRarity[card.rarity] ?? 0) + 1;
-      }
-    }
-
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) {
-        return Container(
-          padding: EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Collection Summary',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 16),
-              
-              Text(
-                'By Rarity:',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              SizedBox(height: 8),
-              ...collectedByRarity.entries.map((entry) => Padding(
-                padding: EdgeInsets.only(left: 16, bottom: 4),
-                child: Text('${entry.key}: ${entry.value}'),
-              )),
-              
-              SizedBox(height: 16),
-              Text(
-                'By Type:',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              SizedBox(height: 8),
-              ...collectedByType.entries.map((entry) => Padding(
-                padding: EdgeInsets.only(left: 16, bottom: 4),
-                child: Text('${entry.key}: ${entry.value}'),
-              )),
-              
-              SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Close'),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }
